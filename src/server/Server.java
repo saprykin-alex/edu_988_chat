@@ -19,39 +19,47 @@ public class Server {
                 System.out.println("Сервер запущен");
                 while (true){ // Бесконечный цикл для ожидания подключения клиентов
                     Socket socket = serverSocket.accept(); // Ожидаем подключения клиента
-                    System.out.println("Клиент подключился");
                     User currentUser = new User(socket);
+                    System.out.println("Клиент №" + currentUser.getUserNumber() + " подключился");
                     users.add(currentUser);
                     DataInputStream in = new DataInputStream(currentUser.getSocket().getInputStream()); // Поток ввода
                     DataOutputStream out = new DataOutputStream(currentUser.getSocket().getOutputStream()); // Поток вывода
-                    ObjectOutputStream oos= new ObjectOutputStream(currentUser.getSocket().getOutputStream());
-                    currentUser.setOos(oos);
+//                    ObjectOutputStream oos= new ObjectOutputStream(currentUser.getSocket().getOutputStream());//С серилизацией потока не работает даже если на клиенте сделана десерилизация
+//                    currentUser.setOos(oos);
+
                     Thread thread = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                currentUser.getOos().writeObject("Добро пожаловать на сервер");
-                                currentUser.getOos().writeObject("Введите ваше имя: ");
-//                                out.writeUTF("Добро пожаловать на сервер");
-//                                out.writeUTF("Введите ваше имя: ");
+//                                System.out.println("Передаю сообщение клиенту №"+currentUser.getUserNumber());
+//                                currentUser.getOos().writeObject("Добро пожаловать на сервер");
+//                                currentUser.getOos().writeObject("Введите ваше имя: ");
+                                out.writeUTF("Добро пожаловать на сервер!");
+                                out.writeUTF("Введите ваше имя: ");
                                 String userName = in.readUTF(); // Ожидаем имя от клиента
-
-                                //Сюда код по распарсиванию имени
-
                                 currentUser.setUserName(userName);
                                 usersName.add(currentUser.getUserName());
-                                String onlineUsers="onlineUsers";
+                                String onlineUsers="К чату подключены: Вы";
                                 for (User user:users) {
-                                    onlineUsers+="//"+user.getUserName();
+                                    if (user.getUserName() != null) {
+                                        DataOutputStream out = new DataOutputStream(user.getSocket().getOutputStream());
+                                        if (!user.equals(currentUser)) {
+                                            onlineUsers += ", " + user.getUserName();
+                                            out.writeUTF(currentUser.getUserName() + " присоединился к беседе");
+                                        } else {
+                                            out.writeUTF(onlineUsers);
+                                        }
+                                    }
                                 }
-
-                                for (User user : users) {
-                                    DataOutputStream out = new DataOutputStream(user.getSocket().getOutputStream());
-                                    out.writeUTF(currentUser.getUserName()+" присоединился к беседе");
-                                    out.writeUTF(onlineUsers);
-                                }
+//                                for (User user : users) {
+//                                    DataOutputStream out = new DataOutputStream(user.getSocket().getOutputStream());
+//                                    out.writeUTF(currentUser.getUserName()+" присоединился к беседе");
+//                                    out.writeUTF(onlineUsers);
+//                                }
                                 while (true){
                                     String request = in.readUTF(); // Ждём сообщение от пользователя
+                                    //Сюда код по распарсиванию имени
+
                                     System.out.println(currentUser.getUserName()+": "+request);
                                     for (User user : users) {
                                         if(users.indexOf(user) == users.indexOf(currentUser)) continue;

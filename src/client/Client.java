@@ -3,6 +3,7 @@ package client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -13,12 +14,14 @@ public class Client {
             System.out.println("Успешно подключен");
             DataInputStream in = new DataInputStream(socket.getInputStream()); // Поток ввода
             DataOutputStream out = new DataOutputStream(socket.getOutputStream()); // Поток вывода
-//            String response = in.readUTF(); // Читаем ответ от сервера
-//            System.out.println(response);
-//            response = in.readUTF();
-//            System.out.println(response);
-            //Scanner scanner = new Scanner(System.in);
-            //out.writeUTF(scanner.nextLine()); // Ожидаем ввод имени
+            String response = in.readUTF(); // Читаем ответ от сервера
+            System.out.print("Ответ сервера: ");
+            System.out.println(response);
+            response = in.readUTF();
+            System.out.println(response);
+
+            Scanner scanner = new Scanner(System.in);
+            out.writeUTF(scanner.nextLine()); // Ожидаем ввод имени
             Thread threadIn = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -36,32 +39,13 @@ public class Client {
             });
             threadIn.start();
 
-
-            Thread threadOut = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Scanner scanner = new Scanner(System.in);
-                    while (true){ // Бесконечно ожидаем ввод сообщения от клиента
-                        try {
-                            String consoleText = scanner.nextLine(); // Ждём сообщение от пользователя
-                            out.writeUTF(consoleText); // Отправляем сообщение на сервер
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
-            threadOut.start();
-
-
-
-//            while (true){
-//                String consoleText = scanner.nextLine(); // Ждём сообщение от пользователя
-//                out.writeUTF(consoleText); // Отправляем сообщение на сервер
-//
-//            }
+            while (true){
+                String consoleText = scanner.nextLine(); // Ждём сообщение от пользователя
+                out.writeUTF(consoleText); // Отправляем сообщение на сервер
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Ошибка!");
         }
     }
 }
