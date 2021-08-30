@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
+
     public static void main(String[] args) {
         try {
             Socket socket = new Socket("localhost", 8188);
@@ -48,4 +50,11 @@ public class Client {
             System.out.println("Ошибка!");
         }
     }
+
+    public void Closing(WindowEvent event){
+
+        System.exit(0);
+    }
+
+
 }
